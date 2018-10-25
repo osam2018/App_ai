@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import com.googlecode.tesseract.android.TessBaseAPI;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -35,12 +38,14 @@ import java.net.URLEncoder;
 
 public class MainActivity extends AppCompatActivity {
     EditText editText;
-    Button btn1, btn2;
+    Button btn1, btn2, btn3;
     TextView textView;
+    ImageView imageView;
     String txtToTranslate; //번역할 문자열 저장용 변수
     private int PICK_IMAGE_REQUEST = 1;
 
     Bitmap bitmap = null;
+    private static int CAPTURE_COUNT = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +53,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         editText = (EditText)findViewById(R.id.et1);
         textView = (TextView)findViewById(R.id.tv1);
+        imageView = (ImageView)findViewById(R.id.iv1) ;
         btn1 = (Button) findViewById(R.id.button1);
         btn2 = (Button) findViewById(R.id.button2);
+        btn3 = (Button) findViewById(R.id.button3);
 
-
+        //번역실행 버튼 이벤트 처리
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -85,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //이미지 업로드 버튼 이벤트 처리
        btn2.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
@@ -93,6 +101,36 @@ public class MainActivity extends AppCompatActivity {
                startActivityForResult(Intent.createChooser(intent, "이미지를 선택해주세요"), PICK_IMAGE_REQUEST);
            }
           });
+
+       imageView.setOnClickListener(new View.OnClickListener() {
+
+           @Override
+           public void onClick(View view) {
+               if(bitmap != null) {
+                   imageView.setVisibility(View.GONE);
+               }
+               else{
+               }
+       }});
+
+
+
+       //저장하기 버튼 이벤트 처리
+       btn3.setOnClickListener(new View.OnClickListener(){
+           @Override
+            public void onClick(View view) {
+                textView.buildDrawingCache();
+                Bitmap captureView = textView.getDrawingCache();
+                FileOutputStream fos;
+                try {
+                    fos = new FileOutputStream(Environment.getExternalStorageDirectory().toString()+"/capture" + CAPTURE_COUNT + ".jpeg");
+                    captureView.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(getApplicationContext(), "저장했습니다.", Toast.LENGTH_LONG).show();
+        }
+    });
     }
 
     @Override  //이미지 선택작업을 후의 결과 처리
@@ -124,22 +162,7 @@ public class MainActivity extends AppCompatActivity {
         return bitmap;
     }
 
-//    private String doOCR(){
-//        private TessBaseAPI mTess; //Tess API reference
-//        String datapath = "" ; //언어데이터가 있는 경로
-//
-////이미지 디코딩을 위한 초기화
-////        image = BitmapFactory.decodeResource
-//
-//        //트레이닝데이터가 카피되어 있는지 체크
-//        checkFile(new File(datapath + "tessdata/"));
-//
-//        //Tesseract API
-//        String lang = "eng";
-//
-//        mTess = new TessBaseAPI();
-//        mTess.init(datapath, lang);
-//    }
+
 
 
 
