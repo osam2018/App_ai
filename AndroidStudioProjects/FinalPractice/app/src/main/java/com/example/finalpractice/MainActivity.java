@@ -2,14 +2,14 @@ package com.example.finalpractice;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import android.text.method.ScrollingMovementMethod;
+
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,7 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.googlecode.tesseract.android.TessBaseAPI;
+
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -45,9 +45,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageView;
     String txtToTranslate; //번역할 문자열 저장용 변수
     private int PICK_IMAGE_REQUEST = 1;
-
     Bitmap bitmap = null;
-    private static int CAPTURE_COUNT = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         editText = (EditText)findViewById(R.id.et1);
         textView = (TextView)findViewById(R.id.tv1);
-        textView.setMovementMethod(new ScrollingMovementMethod());
         imageView = (ImageView)findViewById(R.id.iv1) ;
         btn1 = (Button) findViewById(R.id.button1);
         btn2 = (Button) findViewById(R.id.button2);
@@ -71,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
 
                         String target = editText.getText().toString();
+                        //editText뷰에 문자열이 있고 이미지가 없을 경우
                         if (target != null && bitmap == null) {
-                            Log.d("여기 탔어요",txtToTranslate);
                             String naverHtml = getResult(target);
                             Bundle bun = new Bundle();
                             bun.putString("NAVER_HTML", naverHtml);
@@ -80,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                             msg.setData(bun);
                             handler.sendMessage(msg);
                         }
+                        //imageView에 이미지를 업로드 되어있는 경우
                         else if (bitmap != null){
                             Log.d("여기 타나요?",txtToTranslate);
                             target = txtToTranslate;
@@ -91,8 +90,6 @@ public class MainActivity extends AppCompatActivity {
                             handler.sendMessage(msg);
                         }
                         else{
-                            Log.d("널 예외처리 해야겠지?",txtToTranslate);
-
 
                         }
 
@@ -114,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
            }
           });
 
+       //이미지가 업로드 되어있을때 이미지를 터치하는 것으로 imageView를 초기화
        imageView.setOnClickListener(new View.OnClickListener() {
 
            @Override
@@ -141,17 +139,16 @@ public class MainActivity extends AppCompatActivity {
                try {
                    File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                    File file = new File(directory, "/" + System.currentTimeMillis() + ".jpeg");
-                   //CAPTURE_COUNT++;
                    fos = new FileOutputStream(file);
                    captureView.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                    fos.flush();
                    fos.getFD().sync();
                    fos.close();
 
+                   //sdcard안의 Pictures 폴더로 번역 결과를 JPEG형태로 저장
                    MediaStore.Images.Media.insertImage(getContentResolver(), captureView, file.getName(), "");
 
                } catch (FileNotFoundException e) {
-                   Log.d("설마 저장 안되는 루트?", txtToTranslate);
                    e.printStackTrace();
                } catch (IOException o) {
                    o.printStackTrace();
@@ -193,13 +190,12 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
+    //네이버 NMT번역 API
     private String getResult(String s) {
         String clientId = "tA0Z9ODHFgLw9ZzCqE2X";//애플리케이션 클라이언트 아이디값";
         String clientSecret = "RGT1vLmpFV";//애플리케이션 클라이언트 시크릿값";
         StringBuffer response = null;
         try {
-            Log.v("태그1",s);
             String text = URLEncoder.encode(s, "UTF-8");
             String apiURL = "https://openapi.naver.com/v1/papago/n2mt";
             URL url = new URL(apiURL);
@@ -222,17 +218,16 @@ public class MainActivity extends AppCompatActivity {
                 br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
             }
             String inputLine;
-            response = new StringBuffer();   ////////////////////
+            response = new StringBuffer();
             while ((inputLine = br.readLine()) != null) {
                 response.append(inputLine);
             }
             br.close();
-            //text1.setText(response.toString());
 
+        //response에는 JSON형태로 번역결과가 저장되어 있으므로 파싱할 필요가 있음
         if(response != null) {
             Gson gson = new GsonBuilder().create();
             JsonParser parser = new JsonParser();
-            Log.d("태그2",response.toString());
             JsonElement rootObj = parser.parse(response.toString()).getAsJsonObject().get("message").getAsJsonObject().get("result");
             TranslatedItem item = gson.fromJson(rootObj.toString(), TranslatedItem.class);
 
@@ -261,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //맨위에 스레드에서 getResult(target)이후의 구문을 처리함. textView에 결과가 출력됨
     Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             Bundle bun = msg.getData();

@@ -20,10 +20,10 @@ public class doOCR {
     private String datapath = "" ; //언어데이터가 있는 경로
     private Context c;
 
-    doOCR(Context context) {
+        //doOCR클래스의 컨스트럭터
+        doOCR(Context context) {
 
-        //이미지 디코딩을 위한 초기화
-        image = ((MainActivity) context).getBitmap(); //호출시 여기로 이미지 넣기
+            image = ((MainActivity) context).getBitmap(); //호출시 여기로 이미지 넣기
         //언어파일 경로
         datapath = context.getFilesDir()+ "/tesseract/";
         c = context;
@@ -42,16 +42,15 @@ public class doOCR {
         String OCRresult = null;
         mTess.setImage(image);
         OCRresult = mTess.getUTF8Text();
-//        TextView OCRTextView = (TextView) findViewById(R.id.tv1);
-//        OCRTextView.setText(OCRresult);
+
         return OCRresult;
     }
 
 
-    //tessdata 다운
+    //tessdata 디바이스로 다운
     private void copyFiles() {
         try{
-            String filepath = datapath + "/tessdata/eng.traineddata";
+            String filepath = datapath + "/tessdata/eng.traineddata"; //이 eng.traineddata를 기반으로 이미지에서 영문을 인식함
             AssetManager assetManager = c.getAssets();
             InputStream instream = assetManager.open("tessdata/eng.traineddata");
             OutputStream outstream = new FileOutputStream(filepath);
