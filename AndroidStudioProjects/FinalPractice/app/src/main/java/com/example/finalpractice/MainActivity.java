@@ -140,13 +140,16 @@ public class MainActivity extends AppCompatActivity {
 
                try {
                    File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                   File file = new File(directory, "/capture" + CAPTURE_COUNT + ".jpeg");
-                   CAPTURE_COUNT++;
+                   File file = new File(directory, "/" + System.currentTimeMillis() + ".jpeg");
+                   //CAPTURE_COUNT++;
                    fos = new FileOutputStream(file);
                    captureView.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                    fos.flush();
                    fos.getFD().sync();
                    fos.close();
+
+                   MediaStore.Images.Media.insertImage(getContentResolver(), captureView, file.getName(), "");
+
                } catch (FileNotFoundException e) {
                    Log.d("설마 저장 안되는 루트?", txtToTranslate);
                    e.printStackTrace();
