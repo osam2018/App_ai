@@ -8,6 +8,8 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         editText = (EditText)findViewById(R.id.et1);
         textView = (TextView)findViewById(R.id.tv1);
+        textView.setMovementMethod(new ScrollingMovementMethod());
         imageView = (ImageView)findViewById(R.id.iv1) ;
         btn1 = (Button) findViewById(R.id.button1);
         btn2 = (Button) findViewById(R.id.button2);
@@ -62,12 +65,14 @@ public class MainActivity extends AppCompatActivity {
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                try{
                 // Thread로 웹서버에 접속해야 Exception 없음.
                 new Thread() {
                     public void run() {
+
                         String target = editText.getText().toString();
-                        if (target != null) {
+                        if (target != null && bitmap == null) {
+                            Log.d("여기 탔어요",txtToTranslate);
                             String naverHtml = getResult(target);
                             Bundle bun = new Bundle();
                             bun.putString("NAVER_HTML", naverHtml);
@@ -76,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
                             handler.sendMessage(msg);
                         }
                         else if (bitmap != null){
+                            Log.d("여기 타나요?",txtToTranslate);
                             target = txtToTranslate;
                             String naverHtml = getResult(target);
                             Bundle bun = new Bundle();
@@ -85,10 +91,16 @@ public class MainActivity extends AppCompatActivity {
                             handler.sendMessage(msg);
                         }
                         else{
-                            Toast.makeText(MainActivity.this, R.string.toastmsg,Toast.LENGTH_LONG).show();
+                            Log.d("널 예외처리 해야겠지?",txtToTranslate);
+
+
                         }
+
                     }
-                }.start();
+                }.start();}
+                catch(NullPointerException e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -107,9 +119,12 @@ public class MainActivity extends AppCompatActivity {
            @Override
            public void onClick(View view) {
                if(bitmap != null) {
-                   imageView.setVisibility(View.GONE);
+                   imageView.setImageDrawable(null);
+                   bitmap = null;
+                   Toast.makeText(getApplicationContext(), "이미지를 지웠습니다.", Toast.LENGTH_LONG).show();
                }
                else{
+
                }
        }});
 
@@ -119,15 +134,25 @@ public class MainActivity extends AppCompatActivity {
        btn3.setOnClickListener(new View.OnClickListener(){
            @Override
             public void onClick(View view) {
-                textView.buildDrawingCache();
-                Bitmap captureView = textView.getDrawingCache();
-                FileOutputStream fos;
-                try {
-                    fos = new FileOutputStream(Environment.getExternalStorageDirectory().toString()+"/capture" + CAPTURE_COUNT + ".jpeg");
-                    captureView.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+               textView.buildDrawingCache();
+               Bitmap captureView = textView.getDrawingCache();
+               FileOutputStream fos;
+
+               try {
+                   File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                   File file = new File(directory, "/capture" + CAPTURE_COUNT + ".jpeg");
+                   CAPTURE_COUNT++;
+                   fos = new FileOutputStream(file);
+                   captureView.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                   fos.flush();
+                   fos.getFD().sync();
+                   fos.close();
+               } catch (FileNotFoundException e) {
+                   Log.d("설마 저장 안되는 루트?", txtToTranslate);
+                   e.printStackTrace();
+               } catch (IOException o) {
+                   o.printStackTrace();
+               }
                 Toast.makeText(getApplicationContext(), "저장했습니다.", Toast.LENGTH_LONG).show();
         }
     });
@@ -200,9 +225,7 @@ public class MainActivity extends AppCompatActivity {
             }
             br.close();
             //text1.setText(response.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         if(response != null) {
             Gson gson = new GsonBuilder().create();
             JsonParser parser = new JsonParser();
@@ -215,10 +238,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
         else{
-            System.out.println(response);
             return response.toString();
         }
-
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "번역할 문장을 찾지 못했습니다.", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            return "여기에 결과가 출력됩니다.";
+        }
     }
 
 
