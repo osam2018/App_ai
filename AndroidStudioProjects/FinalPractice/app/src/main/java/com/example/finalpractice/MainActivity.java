@@ -1,10 +1,15 @@
 package com.example.finalpractice;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import android.os.Handler;
@@ -18,6 +23,7 @@ import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
     Button btn1, btn2;
     TextView textView;
     String txtToTranslate; //번역할 문자열 저장용 변수
+    private int PICK_IMAGE_REQUEST = 1;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,10 +72,37 @@ public class MainActivity extends AppCompatActivity {
        btn2.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
-
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivity(intent);
            }
-          }
+          });
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                // Log.d(TAG, String.valueOf(bitmap));
+
+                ImageView imageView = (ImageView) findViewById(R.id.iv1);
+                imageView.setImageBitmap(bitmap);
+                if (bitmap != null) {
+                    Log.d("이미지 있습니다", String.valueOf(bitmap));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     private String getResult(String s) {
         String clientId = "tA0Z9ODHFgLw9ZzCqE2X";//애플리케이션 클라이언트 아이디값";
         String clientSecret = "RGT1vLmpFV";//애플리케이션 클라이언트 시크릿값";

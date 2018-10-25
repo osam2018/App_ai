@@ -9,9 +9,9 @@
                     android:shape="rectangle">
                     <!-- default button color -->
 
-                    <solid android:color="@color/colorPrimary"></solid>
+                    <solid android:color="#1989fa"></solid>
 
-                    <corners android:radius="151dp"></corners>
+                    <corners android:radius="80dp"></corners>
 
                 </shape>
             </item>
