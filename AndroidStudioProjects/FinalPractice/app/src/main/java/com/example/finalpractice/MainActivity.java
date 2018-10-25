@@ -2,6 +2,7 @@ package com.example.finalpractice;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -15,14 +16,17 @@ import android.widget.TextView;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     String txtToTranslate; //번역할 문자열 저장용 변수
     private int PICK_IMAGE_REQUEST = 1;
 
-
+    Bitmap bitmap = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,18 @@ public class MainActivity extends AppCompatActivity {
                             msg.setData(bun);
                             handler.sendMessage(msg);
                         }
+                        else if (bitmap != null){
+                            target = txtToTranslate;
+                            String naverHtml = getResult(target);
+                            Bundle bun = new Bundle();
+                            bun.putString("NAVER_HTML", naverHtml);
+                            Message msg = handler.obtainMessage();
+                            msg.setData(bun);
+                            handler.sendMessage(msg);
+                        }
+                        else{
+                            Toast.makeText(MainActivity.this, R.string.toastmsg,Toast.LENGTH_LONG).show();
+                        }
                     }
                 }.start();
             }
@@ -88,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             Uri uri = data.getData();  //data에서 절대경로로 이미지를 가져옴
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 // Log.d(TAG, String.valueOf(bitmap));
 
                 ImageView imageView = (ImageView) findViewById(R.id.iv1);
@@ -99,9 +115,32 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-//           여기에 OCR메소드를 넣겠습니다.
+           doOCR ocr = new doOCR(this);//여기에 OCR메소드를 넣겠습니다.
+           txtToTranslate = ocr.processImage();
         }
     }
+
+    Bitmap getBitmap() {
+        return bitmap;
+    }
+
+//    private String doOCR(){
+//        private TessBaseAPI mTess; //Tess API reference
+//        String datapath = "" ; //언어데이터가 있는 경로
+//
+////이미지 디코딩을 위한 초기화
+////        image = BitmapFactory.decodeResource
+//
+//        //트레이닝데이터가 카피되어 있는지 체크
+//        checkFile(new File(datapath + "tessdata/"));
+//
+//        //Tesseract API
+//        String lang = "eng";
+//
+//        mTess = new TessBaseAPI();
+//        mTess.init(datapath, lang);
+//    }
+
 
 
     private String getResult(String s) {
