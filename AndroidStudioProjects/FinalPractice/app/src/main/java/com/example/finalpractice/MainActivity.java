@@ -74,18 +74,18 @@ public class MainActivity extends AppCompatActivity {
            public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
-                startActivity(intent);
+               startActivityForResult(Intent.createChooser(intent, "이미지를 선택해주세요"), PICK_IMAGE_REQUEST);
            }
           });
     }
 
-    @Override
+    @Override  //이미지 선택작업을 후의 결과 처리
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-            Uri uri = data.getData();
+            Uri uri = data.getData();  //data에서 절대경로로 이미지를 가져옴
 
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
@@ -93,12 +93,13 @@ public class MainActivity extends AppCompatActivity {
 
                 ImageView imageView = (ImageView) findViewById(R.id.iv1);
                 imageView.setImageBitmap(bitmap);
-                if (bitmap != null) {
-                    Log.d("이미지 있습니다", String.valueOf(bitmap));
-                }
+//                if (bitmap != null) {
+//                    Log.d("이미지 있습니다", String.valueOf(bitmap));
+//                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+//           여기에 OCR메소드를 넣겠습니다.
         }
     }
 
