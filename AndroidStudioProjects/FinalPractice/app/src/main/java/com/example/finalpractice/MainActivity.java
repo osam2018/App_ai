@@ -38,6 +38,25 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+/**
+ * 프로젝트명: AI Image Translator (AiTrans)
+ * 국방부2018년 공개SW캠프 app과정
+ * 개발자: 상병 김정후
+ *
+ * 개요:
+ * 본 프로젝트는 인공신경망 기반 인공지(NMT)을 활용한 이미지 문자인식 번역기 앱입니다.
+ * 현 시점까지 주류로 존재하는 문장 입력형의 번역기에서 더 나아가 사진 등의 이미지에서
+ * 문자를 인식하고 추출하여 번역하는 기능을 추가해봤습니다.
+ * 또한 번역률에 있어서도 NMT는 단순히 단어를 치환하는 방식의 기존의 번역이 아닌
+ * 단어 전후의 맥락까지 고려하기 때문에 현격한 차이를 보이는 것이 특징입니다.
+ * 이 앱을 통해 해외 도서 등을 언어장벽을 구애받지 않고 읽을 수 있게 되기를 바라며 만들었습니다.
+ * 현 시점에서는 영한 번역만이 구현되어있으나 차후 다른 언어 및 언어 자동 감지 기능도 추가될 예정입니다.
+ *
+ * 사용된 API:
+ * 네이버 NMT번역 API
+ * Tesseract API (Apache 라이센스 사용)
+*/
+
 public class MainActivity extends AppCompatActivity {
     EditText editText;
     Button btn1, btn2, btn3;
